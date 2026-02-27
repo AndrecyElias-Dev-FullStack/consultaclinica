@@ -2,16 +2,302 @@
 <html lang="pt-br">
 
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <title>Minha Clínica</title>
+    <title>Clínica Pro - Gestão Integrada</title>
+    <style>
+        .secao {
+            display: none;
+        }
+
+        .card-gestao {
+            cursor: pointer;
+            transition: 0.3s;
+            border-radius: 15px;
+        }
+
+        .card-gestao:hover {
+            background-color: #f0fdf4;
+            transform: translateY(-5px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .border-agenda {
+            border-left: 5px solid #0dcaf0;
+        }
+
+        .info-paciente {
+            font-size: 0.85rem;
+            color: #666;
+        }
+    </style>
 </head>
 
-<body class="container">
-    <div class="p-5 mb-4 bg-light rounded-3">
-        <h1 class="display-5 fw-bold text-success">Clínica Online</h1>
-        <p class="col-md-8 fs-4">O sistema de pacientes agora está na Web!</p>
-        <button class="btn btn-primary btn-lg" type="button">Ver Pacientes</button>
+<body class="container py-4 bg-light">
+    <div class="p-4 mb-4 bg-white rounded shadow-sm border text-center">
+        <h1 class="text-success fw-bold">Clínica On-line</h1>
+        <div class="d-flex flex-wrap justify-content-center gap-2 mt-3">
+            <button class="btn btn-primary" onclick="mostrar('pacientes')">Pacientes</button>
+            <button class="btn btn-info text-white" onclick="mostrar('agendar')">Agendar Consulta</button>
+            <button class="btn btn-success" onclick="mostrar('consultas')">Agenda</button>
+            <button class="btn btn-dark" onclick="mostrar('gerenciar')">⚙️ Gerenciar Clínica</button>
+        </div>
     </div>
+
+    <div id="pacientes" class="secao mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3>Pacientes</h3>
+            <button class="btn btn-success" onclick="mostrar('novo-paciente')">+ Novo Paciente</button>
+        </div>
+        <input type="text" class="form-control mb-3 shadow-sm" placeholder="🔍 Localizar paciente..."
+            onkeyup="filtrarLista('listaOficialPacientes', this.value)">
+        <div id="listaOficialPacientes" class="list-group shadow-sm bg-white"></div>
+    </div>
+
+    <div id="novo-paciente" class="secao mt-4 p-4 border rounded bg-white shadow">
+        <h3>Cadastro de Paciente</h3>
+        <hr>
+        <div class="row g-3">
+            <div class="col-md-2">
+                <label class="form-label fw-bold">ID</label>
+                <input type="text" id="idVisual" class="form-control bg-light" disabled>
+            </div>
+            <div class="col-md-5">
+                <label class="form-label fw-bold">Nome Completo</label>
+                <input type="text" id="nomeNovoPaciente" class="form-control">
+            </div>
+            <div class="col-md-5">
+                <label class="form-label fw-bold">CPF</label>
+                <input type="text" id="cpfNovoPaciente" class="form-control" placeholder="000.000.000-00">
+            </div>
+            <div class="col-md-8">
+                <label class="form-label fw-bold">Endereço</label>
+                <input type="text" id="endNovoPaciente" class="form-control">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label fw-bold">Telefone</label>
+                <input type="text" id="telNovoPaciente" class="form-control" placeholder="(00) 00000-0000">
+            </div>
+        </div>
+        <div class="mt-4 d-flex gap-2">
+            <button onclick="salvarNovoPaciente()" class="btn btn-success px-4">Salvar Cadastro</button>
+            <button onclick="limparCamposPaciente()" class="btn btn-outline-secondary">Limpar Campos</button>
+            <button onclick="mostrar('pacientes')" class="btn btn-link ms-auto">Cancelar</button>
+        </div>
+    </div>
+
+    <div id="gerenciar" class="secao mt-4">
+        <div class="row text-center">
+            <div class="col-md-6 mb-3">
+                <div class="card card-gestao p-4 shadow-sm border-0" onclick="mostrar('gestao-medicos')">
+                    <h3>👨‍⚕️ Médicos</h3>
+                    <p class="text-muted">Cadastrar profissionais</p>
+                </div>
+            </div>
+            <div class="col-md-6 mb-3">
+                <div class="card card-gestao p-4 shadow-sm border-0" onclick="mostrar('gestao-especialidades')">
+                    <h3>🩺 Especialidades</h3>
+                    <p class="text-muted">Gerenciar áreas</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="gestao-especialidades" class="secao mt-4">
+        <div class="card p-4 shadow-sm border-0">
+            <h3>Especialidades</h3>
+            <div class="input-group mb-3">
+                <input type="text" id="novaEspInput" class="form-control" placeholder="Ex: Dermatologia">
+                <button class="btn btn-success" onclick="salvarEspecialidade()">Adicionar</button>
+            </div>
+            <ul id="listaEspecialidades" class="list-group list-group-flush"></ul>
+        </div>
+        <button class="btn btn-link mt-3" onclick="mostrar('gerenciar')">Voltar</button>
+    </div>
+
+    <div id="gestao-medicos" class="secao mt-4">
+        <div class="card p-4 shadow-sm border-0 mb-4">
+            <h3>Novo Médico</h3>
+            <div class="row g-2">
+                <div class="col-md-5">
+                    <input type="text" id="nomeMedicoInput" class="form-control" placeholder="Nome do Médico">
+                </div>
+                <div class="col-md-5">
+                    <select id="selectEspMedico" class="form-select"></select>
+                </div>
+                <div class="col-md-2">
+                    <button class="btn btn-success w-100" onclick="salvarMedico()">Salvar</button>
+                </div>
+            </div>
+        </div>
+        <div id="listaMedicos" class="row"></div>
+        <button class="btn btn-link mt-3" onclick="mostrar('gerenciar')">Voltar</button>
+    </div>
+
+    <div id="agendar" class="secao mt-4 p-4 border rounded bg-white shadow-sm">
+        <h3>📅 Agendar Consulta</h3>
+        <div class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label">Paciente</label>
+                <select id="selectPacienteConsulta" class="form-select"></select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Médico</label>
+                <select id="selectMedicoConsulta" class="form-select"></select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Data e Hora</label>
+                <input type="datetime-local" id="dataHoraAgendamento" class="form-control">
+            </div>
+        </div>
+        <button onclick="salvarAgendamento()" class="btn btn-dark w-100 mt-4">Confirmar Agendamento</button>
+    </div>
+
+    <div id="consultas" class="secao mt-4">
+        <h3>Agenda de Consultas</h3>
+        <div id="listaDeConsultas" class="row"></div>
+    </div>
+
+    <script>
+        let pacientes = [
+            { id: 1, nome: "João Silva", cpf: "111.222.333-44", endereco: "Rua A, 100", tel: "(11) 9999-8888" }
+        ];
+        let especialidades = ["Cardiologia", "Clínica Geral"];
+        let medicos = [{ nome: "Dr. Ricardo Silva", esp: "Cardiologia" }];
+        let agendamentos = [];
+
+        function mostrar(idSecao) {
+            document.querySelectorAll('.secao').forEach(s => s.style.display = 'none');
+            document.getElementById(idSecao).style.display = 'block';
+
+            if (idSecao === 'pacientes') renderizarPacientes();
+            if (idSecao === 'novo-paciente') limparCamposPaciente();
+            if (idSecao === 'gestao-especialidades') renderizarEspecialidades();
+            if (idSecao === 'gestao-medicos') renderizarMedicos();
+            if (idSecao === 'consultas') renderizarConsultas();
+            if (idSecao === 'agendar') popularSelectsAgendamento();
+        }
+
+        // --- LÓGICA PACIENTES ---
+        function limparCamposPaciente() {
+            document.getElementById('nomeNovoPaciente').value = "";
+            document.getElementById('cpfNovoPaciente').value = "";
+            document.getElementById('endNovoPaciente').value = "";
+            document.getElementById('telNovoPaciente').value = "";
+            const proximoId = pacientes.length > 0 ? Math.max(...pacientes.map(p => p.id)) + 1 : 1;
+            document.getElementById('idVisual').value = proximoId;
+        }
+
+        function salvarNovoPaciente() {
+            const nome = document.getElementById('nomeNovoPaciente').value;
+            const cpf = document.getElementById('cpfNovoPaciente').value;
+            const endereco = document.getElementById('endNovoPaciente').value;
+            const tel = document.getElementById('telNovoPaciente').value;
+
+            if (!nome) return alert("O nome é obrigatório!");
+
+            const novoId = pacientes.length > 0 ? Math.max(...pacientes.map(p => p.id)) + 1 : 1;
+
+            pacientes.push({ id: novoId, nome, cpf, endereco, tel });
+
+            alert("Paciente cadastrado!");
+            limparCamposPaciente();
+            mostrar('pacientes');
+        }
+
+        function renderizarPacientes() {
+            const lista = document.getElementById('listaOficialPacientes');
+            pacientes.sort((a, b) => a.nome.localeCompare(b.nome));
+            lista.innerHTML = pacientes.map((p, i) => `
+                <div class="list-group-item d-flex justify-content-between align-items-center p-3">
+                    <div>
+                        <span class="badge bg-secondary mb-1">ID: ${p.id}</span>
+                        <div class="fw-bold">${p.nome}</div>
+                        <div class="info-paciente">
+                            <strong>CPF:</strong> ${p.cpf} | <strong>Tel:</strong> ${p.tel}<br>
+                            <strong>Endereço:</strong> ${p.endereco}
+                        </div>
+                    </div>
+                    <button class="btn btn-sm btn-outline-danger" onclick="pacientes.splice(${i},1); renderizarPacientes()">Excluir</button>
+                </div>
+            `).join('');
+        }
+
+        // --- LÓGICA ESPECIALIDADES ---
+        function renderizarEspecialidades() {
+            const lista = document.getElementById('listaEspecialidades');
+            especialidades.sort();
+            lista.innerHTML = especialidades.map((e, i) => `
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    ${e} <button class="btn btn-sm text-danger" onclick="especialidades.splice(${i},1); renderizarEspecialidades()">Excluir</button>
+                </li>
+            `).join('');
+        }
+        function salvarEspecialidade() {
+            const input = document.getElementById('novaEspInput');
+            if (input.value) { especialidades.push(input.value); input.value = ""; renderizarEspecialidades(); }
+        }
+
+        // --- LÓGICA MÉDICOS ---
+        function renderizarMedicos() {
+            const container = document.getElementById('listaMedicos');
+            document.getElementById('selectEspMedico').innerHTML = especialidades.map(e => `<option value="${e}">${e}</option>`).join('');
+            container.innerHTML = medicos.map((m, i) => `
+                <div class="col-md-4 mb-3">
+                    <div class="card p-3 shadow-sm border-0 border-start border-success border-4">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div><strong>${m.nome}</strong><br><small class="text-muted">${m.esp}</small></div>
+                            <button class="btn btn-sm btn-outline-danger border-0" onclick="medicos.splice(${i},1); renderizarMedicos()">✖</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        function salvarMedico() {
+            const nome = document.getElementById('nomeMedicoInput').value;
+            const esp = document.getElementById('selectEspMedico').value;
+            if (nome) { medicos.push({ nome, esp }); document.getElementById('nomeMedicoInput').value = ""; renderizarMedicos(); }
+        }
+
+        // --- LÓGICA AGENDA ---
+        function popularSelectsAgendamento() {
+            document.getElementById('selectPacienteConsulta').innerHTML = pacientes.map(p => `<option value="${p.nome}">${p.nome} (ID: ${p.id})</option>`).join('');
+            document.getElementById('selectMedicoConsulta').innerHTML = medicos.map(m => `<option value="${m.nome} (${m.esp})">${m.nome} - ${m.esp}</option>`).join('');
+        }
+        function salvarAgendamento() {
+            const nome = document.getElementById('selectPacienteConsulta').value;
+            const medico = document.getElementById('selectMedicoConsulta').value;
+            const dataHora = document.getElementById('dataHoraAgendamento').value;
+            if (!nome || !dataHora) return alert("Selecione o paciente e a data!");
+            agendamentos.push({ nome, medico, dataHora });
+            mostrar('consultas');
+        }
+        function renderizarConsultas() {
+            const container = document.getElementById('listaDeConsultas');
+            agendamentos.sort((a, b) => new Date(a.dataHora) - new Date(b.dataHora));
+            container.innerHTML = agendamentos.map((ag, i) => `
+                <div class="col-md-4 mb-3">
+                    <div class="card border-0 shadow-sm p-3 border-agenda">
+                        <h5 class="text-primary mb-1">${ag.nome}</h5>
+                        <p class="mb-1 small">🩺 ${ag.medico}</p>
+                        <p class="mb-0 small text-muted">📅 ${new Date(ag.dataHora).toLocaleString()}</p>
+                        <button class="btn btn-sm btn-link text-danger p-0 mt-2" onclick="agendamentos.splice(${i},1); renderizarConsultas()">Cancelar</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function filtrarLista(id, texto) {
+            const itens = document.getElementById(id).children;
+            Array.from(itens).forEach(item => {
+                item.style.setProperty('display', item.innerText.toLowerCase().includes(texto.toLowerCase()) ? 'flex' : 'none', 'important');
+            });
+        }
+
+        // Início
+        mostrar('pacientes');
+    </script>
 </body>
 
 </html>
