@@ -1,48 +1,17 @@
 package com.projeto.consultaclinica.model;
 
-    public class Paciente {
-        private int id;
-        private String nome;
-        private int idade;
-        private String telefone;
+import jakarta.persistence.*;
 
-        public Paciente(int id, String nome, int idade, String telefone) {
-            this.id = id;
-            this.nome = nome;
-            this.idade = idade;
-            this.telefone = telefone;
-        }
+@Entity
+@Table(name = "paciente") // Nome da tabela no seu Workbench
+public class Paciente {
 
-        // Getters e Setters
-        public int getId() {
-            return id;
-        }
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-        public void setId(int id) {
-            this.id = id;
-        }
+    private String nome;
+    private String cpf;
 
-        public String getNome() {
-            return nome;
-        }
-
-        public void setNome(String nome) {
-            this.nome = nome;
-        }
-
-        public int getIdade() {
-            return idade;
-        }
-
-        public void setIdade(int idade) {
-            this.idade = idade;
-        }
-
-        public String getTelefone() {
-            return telefone;
-        }
-
-        public void setTelefone(String telefone) {
-            this.telefone = telefone;
-        }
-    }
+    // Getters e Setters...
+}
